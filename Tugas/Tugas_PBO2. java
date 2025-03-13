@@ -1,0 +1,79 @@
+import java.util.Scanner;
+
+class Admin {
+    private String username = "admin468";
+    private String password = "password468";
+
+    public boolean login(String username, String password) {
+        return this.username.equals(username) && this.password.equals(password);
+    }
+}
+
+class Mahasiswa {
+    private String nama = "Dhyan Ariyanti Wijaya";
+    private String nim = "202410370110468";
+
+    public boolean login(String nama, String nim) {
+        return this.nama.equalsIgnoreCase(nama) && this.nim.equals(nim);
+    }
+
+    public void displayInfo() {
+        System.out.println("Nama: " + nama);
+        System.out.println("NIM: " + nim);
+    }
+}
+
+class LoginSystem {
+    private static Scanner penginput = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        while (true) {
+            System.out.println("Pilih Login:\n1. Admin\n2. Mahasiswa\n3. Keluar\nMasukkan Pilihan:");
+            int pilihan = penginput.nextInt();
+            penginput.nextLine();
+            switch (pilihan) {
+                case 1:
+                    loginAdmin();
+                    break;
+                case 2:
+                    loginMahasiswa();
+                    break;
+                case 3:
+                    System.out.println("Terima kasih telah menggunakan sistem!");
+                    return;
+                default:
+                    System.out.println("Pilihan tidak valid.");
+                    break;
+            }
+        }
+    }
+
+    public static void loginAdmin() {
+        Admin admin = new Admin();
+        System.out.println("Masukkan username: ");
+        String usernameAdmin = penginput.nextLine();
+        System.out.println("Masukkan Password: ");
+        String passwordAdmin = penginput.nextLine();
+
+        if (admin.login(usernameAdmin, passwordAdmin)) {
+            System.out.println("Login Admin Berhasil!");
+        } else {
+            System.out.println("Login gagal! Username atau password salah.");
+        }
+    }
+
+    public static void loginMahasiswa() {
+        Mahasiswa mahasiswa = new Mahasiswa();
+        System.out.println("Masukkan nama: ");
+        String namaMahasiswa = penginput.nextLine();
+        System.out.println("Masukkan NIM: ");
+        String nimMahasiswa = penginput.nextLine();
+
+        if (mahasiswa.login(namaMahasiswa, nimMahasiswa)) {
+            System.out.println("Login Mahasiswa Berhasil!");
+            mahasiswa.displayInfo();
+        } else {
+            System.out.println("Login gagal! Nama atau NIM salah.");
+        }
+    }
+}
