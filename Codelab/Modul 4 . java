@@ -1,0 +1,126 @@
+// anggota
+package perpustakaan;
+public class Anggota implements Peminjaman {
+    private String nama;
+    private String idAnggota;
+
+    public Anggota(String nama, String idAnggota) {
+        this.nama = nama;
+        this.idAnggota = idAnggota;
+    }
+
+    @Override
+    public void pinjamBuku(String judul) {
+        System.out.println(nama + " meminjam buku berjudul: " + judul);
+    }
+
+    public void pinjamBuku(String judul, int durasi) {
+        System.out.println(nama + " meminjam buku \"" + judul + "\" selama " + durasi + " hari.");
+    }
+
+    @Override
+    public void kembalikanBuku(String judul) {
+        System.out.println(nama + " mengembalikan buku berjudul: " + judul);
+    }
+
+    public void displayInfo() {
+        System.out.println("Anggota: " + nama + " (ID: " + idAnggota + ")");
+    }
+}
+
+// buku
+package perpustakaan;
+
+public abstract class Buku {
+    protected String judul;
+    protected String penulis;
+
+    public Buku(String judul, String penulis) {
+        this.judul = judul;
+        this.penulis = penulis;
+    }
+
+    public abstract void displayInfo();
+
+    public String getJudul() {
+        return judul;
+    }
+}
+
+// fiksi
+package perpustakaan;
+
+public class Fiksi extends Buku {
+    private String genre;
+
+    public Fiksi(String judul, String penulis, String genre) {
+        super(judul, penulis);
+        this.genre = genre;
+    }
+
+    @Override
+    public void displayInfo() {
+        System.out.println("Buku Fiksi: " + judul + " oleh " + penulis + " (Genre: " + genre + ")");
+    }
+}
+
+// nonfiksi
+package perpustakaan;
+
+public class NonFiksi extends Buku {
+    private String genre;
+
+    public NonFiksi(String judul, String penulis, String genre) {
+        super(judul, penulis);
+        this.genre = genre;
+    }
+
+    @Override
+    public void displayInfo() {
+        System.out.println("Buku Fiksi: " + judul + " oleh " + penulis + " (Genre: " + genre + ")");
+    }
+}
+
+// peminjam
+package perpustakaan;
+
+public interface Peminjaman {
+    void pinjamBuku(String judul);
+
+    void kembalikanBuku(String judul);
+}
+
+// main
+package app;
+
+import perpustakaan.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // Buku
+        Buku b1 = new NonFiksi("Madilog", "Tan Malaka", "Sejarah & Ilmu Pengetahuan");
+        Buku b2 = new Fiksi("Hainuwele: Sang Putri Kelapa", "Lilis Hu", "Dongeng");
+
+        b1.displayInfo();
+        b2.displayInfo();
+
+        System.out.println();
+
+        Anggota a1 = new Anggota("Dhyan", "468");
+        Anggota a2 = new Anggota("Putri", "453");
+
+        a1.displayInfo();
+        a2.displayInfo();
+
+
+        System.out.println();
+
+        a1.pinjamBuku("Madilog");
+        a2.pinjamBuku("Hainuwele: Sang Putri Kelapa", 7);
+
+        System.out.println();
+        
+        a1.kembalikanBuku("Madilog");
+        a2.kembalikanBuku("Hainuwele: Sang Putri Kelapa");
+    }
+}
