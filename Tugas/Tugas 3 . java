@@ -1,0 +1,118 @@
+// user
+public class User {
+    private String nama;
+    private String nim;
+
+    public User(String nama, String nim) {
+        this.nama = nama;
+        this.nim = nim;
+    }
+
+    public String getNama() {
+        return nama;
+    }
+
+    public String getNim() {
+        return nim;
+    }
+
+    public void setNama(String nama) {
+        this.nama = nama;
+    }
+
+    public void setNim(String nim) {
+        this.nim = nim;
+    }
+
+    public boolean login(String nama, String nim) {
+        return false;
+    }
+
+    public void displayInfo() {
+        System.out.println("User info.");
+    }
+}
+
+// admin
+public class Admin extends User{
+    private String username = "admin468";
+    private String password = "password468";
+
+        public Admin() {
+            super("dhyan", "202410370110468");
+        }
+
+        @Override
+        public boolean login(String username, String password) {
+            return this.username.equals(username) && this.password.equals(password);
+        }
+
+        @Override
+        public void displayInfo() {
+            System.out.println("Login Admin berhasil.");
+        }
+
+}
+
+// Mahasiswa
+public class Mahasiswa extends User{
+    public Mahasiswa(String nama, String nim) {
+        super(nama, nim);
+    }
+
+        @Override
+        public boolean login(String nama, String nim) {
+        return getNama().equals(nama) && getNim().equals(nim);
+    }
+
+        @Override
+        public void displayInfo() {
+            System.out.println("Login Mahasiswa berhasil.");
+    }
+
+}
+
+// loginsystem
+import java.util.Scanner;
+public class Loginsystem {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+
+            System.out.println("Pilih login sebagai: \n1. Admin\n2. Mahasiswa");
+            System.out.print("Masukkan pilihan: ");
+            int pilihan = input.nextInt();
+            input.nextLine(); // Clear buffer
+
+            if (pilihan == 1) {
+                System.out.print("Masukkan username: ");
+                String user = input.nextLine();
+                System.out.print("Masukkan password: ");
+                String pass = input.nextLine();
+
+                Admin admin = new Admin();
+                if (admin.login(user, pass)) {
+                    admin.displayInfo();
+                } else {
+                    System.out.println("Login Admin gagal.");
+                }
+
+            } else if (pilihan == 2) {
+                System.out.print("Masukkan nama: ");
+                String nama = input.nextLine();
+                System.out.print("Masukkan NIM: ");
+                String nim = input.nextLine();
+
+                Mahasiswa mhs = new Mahasiswa(nama, nim);
+                if (mhs.login(nama, nim)) {
+                    mhs.displayInfo();
+                } else {
+                    System.out.println("Login Mahasiswa gagal.");
+                }
+            } else {
+                System.out.println("Pilihan tidak valid.");
+            }
+
+            input.close();
+        }
+
+}
