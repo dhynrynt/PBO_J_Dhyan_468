@@ -1,5 +1,6 @@
-// anggota
-package perpustakaan;
+## package perpustakaan;
+// class anggota
+
 public class Anggota implements Peminjaman {
     private String nama;
     private String idAnggota;
@@ -28,8 +29,8 @@ public class Anggota implements Peminjaman {
     }
 }
 
-// buku
-package perpustakaan;
+
+// class buku
 
 public abstract class Buku {
     protected String judul;
@@ -47,8 +48,7 @@ public abstract class Buku {
     }
 }
 
-// fiksi
-package perpustakaan;
+// class fiksi
 
 public class Fiksi extends Buku {
     private String genre;
@@ -64,8 +64,8 @@ public class Fiksi extends Buku {
     }
 }
 
-// nonfiksi
-package perpustakaan;
+// class nonfiksi
+
 
 public class NonFiksi extends Buku {
     private String genre;
@@ -81,8 +81,8 @@ public class NonFiksi extends Buku {
     }
 }
 
+
 // peminjam
-package perpustakaan;
 
 public interface Peminjaman {
     void pinjamBuku(String judul);
@@ -90,8 +90,9 @@ public interface Peminjaman {
     void kembalikanBuku(String judul);
 }
 
-// main
-package app;
+
+## package app;
+// class main
 
 import perpustakaan.*;
 
