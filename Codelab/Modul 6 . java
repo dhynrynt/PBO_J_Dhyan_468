@@ -1,0 +1,114 @@
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
+import java.util.Random;
+
+public class TebakAngkaGame extends Application {
+
+    private int angkaAcak;
+    private int jumlahPercobaan;
+    private final Random random = new Random();
+
+    private Label feedbackLabel;
+    private Label percobaanLabel;
+    private TextField inputField;
+    private Button actionButton;
+
+    @Override
+    public void start(Stage stage) {
+        angkaAcak = generateRandom();
+        jumlahPercobaan = 0;
+
+
+        Label titleLabel = new Label("Tebak Angka 1–100");
+
+        titleLabel.setFont(Font.font("Arial", 24));
+        titleLabel.setTextFill(Color.DARKBLUE);
+
+        feedbackLabel = new Label("Masukkan tebakkanmu!");
+        feedbackLabel.setFont(Font.font("Arial", 16));
+        feedbackLabel.setTextFill(Color.GRAY);
+
+        inputField = new TextField();
+        inputField.setPromptText("Masukkan angka di sini");
+        inputField.setMaxWidth(200);
+
+        actionButton = new Button("Coba Tebak!");
+        actionButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        actionButton.setOnAction(e -> prosesTebakan());
+
+        HBox inputArea = new HBox(10, inputField, actionButton);
+        inputArea.setAlignment(Pos.CENTER);
+
+        percobaanLabel = new Label("Jumlah percobaan: 0");
+        percobaanLabel.setFont(Font.font("Arial", 14));
+        percobaanLabel.setTextFill(Color.GRAY);
+
+        VBox root = new VBox(15, titleLabel, feedbackLabel, inputArea, percobaanLabel);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+        root.setStyle("-fx-background-color: #f0f8ff;");
+
+        Scene scene = new Scene(root, 420, 280);
+        stage.setTitle("Tebak Angka Game");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private int generateRandom() {
+        return random.nextInt(100) + 1;
+    }
+
+    private void prosesTebakan() {
+        if (actionButton.getText().equals("Main Lagi")) {
+            angkaAcak = generateRandom();
+            jumlahPercobaan = 0;
+            inputField.clear();
+            inputField.setDisable(false);
+            actionButton.setText("Coba Tebak!");
+            actionButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+            feedbackLabel.setText("Masukkan tebakkanmu!");
+            feedbackLabel.setTextFill(Color.GRAY);
+            percobaanLabel.setText("Jumlah percobaan: 0");
+            return;
+        }
+
+        String input = inputField.getText();
+        try {
+            int tebakan = Integer.parseInt(input);
+            jumlahPercobaan++;
+
+            if (tebakan < angkaAcak) {
+                feedbackLabel.setText("🔺 Terlalu kecil!");
+                feedbackLabel.setTextFill(Color.ORANGE);
+            } else if (tebakan > angkaAcak) {
+                feedbackLabel.setText("▲ Terlalu besar!");
+                feedbackLabel.setTextFill(Color.RED);
+            } else {
+                feedbackLabel.setText("✔ Tebakan benar!");
+                feedbackLabel.setTextFill(Color.GREEN);
+                inputField.setDisable(true);
+                actionButton.setText("Main Lagi");
+                actionButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+            }
+
+            percobaanLabel.setText("Jumlah percobaan: " + jumlahPercobaan);
+        } catch (NumberFormatException e) {
+            feedbackLabel.setText("⚠ Masukkan angka valid!");
+            feedbackLabel.setTextFill(Color.DARKRED);
+        }
+
+        inputField.clear();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
