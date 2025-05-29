@@ -1,0 +1,499 @@
+// Class User 
+
+package com.praktikum.users;
+
+public abstract class User {
+    private String nama;
+    private String nim;
+
+    public User(String nama, String nim) {
+        this.nama = nama;
+        this.nim = nim;
+    }
+
+    void setNama(String name) {
+        nama = name;
+    }
+
+    public String getNama() {
+        return nama;
+    }
+
+    void setNim(String Nim) {
+        nim = Nim;
+    }
+
+    public String getNim() {
+        return nim;
+    }
+
+    abstract void login();
+
+    public void displayInfo() {
+        System.out.println("Nama: " + nama + ", NIM: " + nim);
+    }
+
+    public abstract void displayAppMenu();
+}
+
+
+
+// class admin
+
+package com.praktikum.users;
+import com.praktikum.main.LoginSystem;
+import com.praktikum.data.Item;
+import java.util.InputMismatchException;
+
+import java.util.Scanner;
+
+public class Admin extends User implements com.praktikum.actions.AdminAction {
+    public String username;
+    public String password;
+
+    public Admin(String username, String password) {
+        super(username, password);
+        this.username = username;
+        this.password = password;
+    }
+
+    public Scanner input = new Scanner(System.in);
+
+    public void manageItems() {
+        Scanner input = this.input;
+        while (true) {
+            System.out.println("--------KELOLA BARANG--------");
+            System.out.println("1. Lihat Semua Laporan");
+            System.out.println("2. Tandai Barang Telah Diambil (Claimed)");
+            System.out.println("0. Kembali");
+            System.out.print("Pilih: ");
+            int pilih = -1;
+            try {
+                pilih = input.nextInt();
+                input.nextLine();
+            } catch (InputMismatchException e) {
+                System.out.println("Input harus berupa angka!");
+                input.nextLine();
+                continue;
+            }
+            if (pilih == 0) break;
+            switch (pilih) {
+                case 1:
+                    if (LoginSystem.reportedItems.isEmpty()) {
+                        System.out.println("Belum ada laporan barang.");
+                    } else {
+                        int idx = 1;
+                        for (Item item : LoginSystem.reportedItems) {
+                            System.out.println(idx + ". " + item.getItemName() + " | " + item.getDescription() + " | " + item.getLocation() + " | Status: " + item.getStatus());
+                            idx++;
+                        }
+                    }
+                    break;
+                case 2:
+                    if (LoginSystem.reportedItems.isEmpty()) {
+                        System.out.println("Belum ada laporan barang.");
+                        break;
+                    }
+                    System.out.println("Daftar barang yang statusnya 'Reported':");
+                    int idx = 1;
+                    for (Item item : LoginSystem.reportedItems) {
+                        if ("Reported".equals(item.getStatus())) {
+                            System.out.println(idx + ". " + item.getItemName() + " | " + item.getDescription() + " | " + item.getLocation());
+                        }
+                        idx++;
+                    }
+                    System.out.print("Masukkan nomor indeks barang yang ingin ditandai: ");
+                    int index = 0;
+                    try {
+                        index = input.nextInt();
+                        input.nextLine();
+                        index = index - 1;
+                        Item item = LoginSystem.reportedItems.get(index);
+                        if ("Reported".equals(item.getStatus())) {
+                            item.setStatus("Claimed");
+                            System.out.println("Barang berhasil ditandai sebagai 'Claimed'.");
+                        } else {
+                            System.out.println("Barang sudah berstatus 'Claimed'.");
+                        }
+                    } catch (InputMismatchException e) {
+                        System.out.println("Input harus berupa angka!");
+                        input.nextLine();
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("Indeks tidak valid!");
+                    }
+                    break;
+                default:
+                    System.out.println("Pilihan tidak valid!");
+            }
+        }
+        displayAppMenu();
+    }
+
+    public void manageUsers() {
+        Scanner input = this.input;
+        while (true) {
+            System.out.println("--------KELOLA MAHASISWA--------");
+            System.out.println("1. Tambah Mahasiswa");
+            System.out.println("2. Hapus Mahasiswa");
+            System.out.println("0. Kembali");
+            System.out.print("Pilih: ");
+            int pilih = -1;
+            try {
+                pilih = input.nextInt();
+                input.nextLine();
+            } catch (InputMismatchException e) {
+                System.out.println("Input harus berupa angka!");
+                input.nextLine();
+                continue;
+            }
+            if (pilih == 0) break;
+            switch (pilih) {
+                case 1:
+                    System.out.print("Masukkan Nama Mahasiswa: ");
+                    String nama = input.nextLine();
+                    System.out.print("Masukkan NIM Mahasiswa: ");
+                    String nim = input.nextLine();
+                    LoginSystem.userList.add(new Mahasiswa(nama, nim));
+                    System.out.println("Mahasiswa berhasil ditambahkan.");
+                    break;
+                case 2:
+                    System.out.print("Masukkan NIM Mahasiswa yang akan dihapus: ");
+                    String nimHapus = input.nextLine();
+                    boolean found = false;
+                    for (int i = 0; i < LoginSystem.userList.size(); i++) {
+                        User u = LoginSystem.userList.get(i);
+                        if (u instanceof Mahasiswa && ((Mahasiswa) u).getNim().equals(nimHapus)) {
+                            LoginSystem.userList.remove(i);
+                            System.out.println("Mahasiswa berhasil dihapus.");
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        System.out.println("Mahasiswa dengan NIM tersebut tidak ditemukan.");
+                    }
+                    break;
+                default:
+                    System.out.println("Pilihan tidak valid!");
+            }
+        }
+        displayAppMenu();
+    }
+
+    public void displayAppMenu(){
+        System.out.println("--------MENU--------");
+        System.out.println("");
+        System.out.println("1. kelola laporan Barang");
+        System.out.println("2. kelola data Mahasiswa");
+        System.out.println("0. Logout");
+
+        int pilih =  input.nextInt();
+        input.nextLine();
+        switch (pilih){
+            case 1:
+                manageItems();
+                break;
+            case 2:
+                manageUsers();
+                break;
+            case 0:
+                System.out.println("Logout berhasil");
+                System.out.println("");
+                System.out.println("");
+                System.out.println("");
+                LoginSystem.mulai();
+                break;
+        }
+    }
+
+    @Override
+    public void login() {
+        System.out.println("Yang penting di override");
+    }
+}
+
+
+// class mahasiswa 
+
+package com.praktikum.users;
+import com.praktikum.actions.MahasiswaAction;
+import java.util.Scanner;
+import com.praktikum.main.LoginSystem;
+import com.praktikum.data.Item;
+import java.util.InputMismatchException;
+
+public class Mahasiswa extends User implements MahasiswaAction {
+    public Mahasiswa(String nama, String nim) {
+        super(nama, nim);
+    }
+
+    Scanner input = new Scanner(System.in);
+
+    @Override
+    public void login() {
+        System.out.println("Yang penting di override");
+    }
+
+    public void reportItem() {
+        System.out.println("Report Item");
+        System.out.print("    Nama Barang: ");
+        String namaBarang = input.nextLine();
+        System.out.print("    Deskripsi Barang: ");
+        String deskripsiBarang = input.nextLine();
+        System.out.print("    Lokasi terakhir: ");
+        String lokasiTerakhir = input.nextLine();
+        Item item = new Item(namaBarang, deskripsiBarang, lokasiTerakhir, "Reported");
+        LoginSystem.reportedItems.add(item);
+        System.out.println("Laporan berhasil dilaporkan!");
+        System.out.println("Nama Barang: " + namaBarang);
+        System.out.println("Deskripsi Barang: " + deskripsiBarang);
+        System.out.println("Lokasi Terakhir: " + lokasiTerakhir);
+        System.out.println("");
+        System.out.println("klik enter untuk kembali");
+        input.nextLine();
+        displayAppMenu();
+    }
+
+    public void viewReportedItems() {
+        if (LoginSystem.reportedItems.isEmpty()) {
+            System.out.println("Belum ada laporan barang.");
+        } else {
+            int idx = 1;
+            for (Item item : LoginSystem.reportedItems) {
+                if ("Reported".equals(item.getStatus())) {
+                    System.out.println(idx + ". " + item.getItemName() + " | " + item.getDescription() + " | " + item.getLocation());
+                }
+                idx++;
+            }
+        }
+        System.out.println("");
+        System.out.println("klik enter untuk kembali");
+        input.nextLine();
+        displayAppMenu();
+    }
+
+    public void displayAppMenu() {
+        System.out.println("--------MENU MAHASISWA--------");
+        System.out.println("");
+        System.out.println("1. Laporkan Barang Temuan/Hilang");
+        System.out.println("2. Lihat Daftar Laporan");
+        System.out.println("0. Logout");
+        int pilih = -1;
+        try {
+            pilih = input.nextInt();
+            input.nextLine();
+        } catch (InputMismatchException e) {
+            System.out.println("Input harus berupa angka!");
+            input.nextLine();
+            displayAppMenu();
+            return;
+        }
+        switch (pilih) {
+            case 1:
+                reportItem();
+                break;
+            case 2:
+                viewReportedItems();
+                break;
+            case 0:
+                System.out.println("Logout berhasil");
+                System.out.println("");
+                System.out.println("");
+                System.out.println("");
+                LoginSystem.mulai();
+                break;
+            default:
+                System.out.println("Pilihan tidak valid! ..... klik enter untuk kembali");
+                displayAppMenu();
+                break;
+        }
+    }
+}
+
+
+//interface
+
+package com.praktikum.actions;
+
+public interface AdminAction {
+    public void manageItems();
+
+    public void manageUsers();
+}
+
+
+
+
+package com.praktikum.actions;
+
+public interface MahasiswaAction {
+    public void reportItem();
+
+    public void viewReportedItems();
+}
+
+
+//class item
+package com.praktikum.data;
+
+public class Item {
+    private String itemName;
+    private String description;
+    private String location;
+    private String status;
+
+    public Item(String itemName, String description, String location, String status) {
+        this.itemName = itemName;
+        this.description = description;
+        this.location = location;
+        this.status = status;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+}
+
+
+
+
+// loginsystem
+
+package com.praktikum.main;
+
+import com.praktikum.data.*;
+import java.util.*;
+import com.praktikum.users.*;
+
+public class LoginSystem {
+
+    public static ArrayList<User> userList = new ArrayList<>();
+    public static ArrayList<Item> reportedItems = new ArrayList<>();
+    public static void main(String[] args) {
+        mulai();
+    }
+
+
+
+    public static void mulai(){
+        Scanner input = new Scanner(System.in);
+
+        Admin admin = new Admin("admin468", "password468");
+        Mahasiswa mahasiswa = new Mahasiswa("dhyan ariyanti wijaya", "202410370110468");
+        userList.add(admin);
+        userList.add(mahasiswa);
+
+        User user = null;
+
+        System.out.println("--------------PILIH LOGIN--------------");
+        System.out.println("1. Admin");
+        System.out.println("2. Mahasiswa");
+        System.out.println("---------------------------------------");
+        System.out.print("Pilih: ");
+        int pilih = 0;
+        try {
+            pilih = input.nextInt();
+            input.nextLine();
+        } catch (InputMismatchException e) {
+            System.out.println("Input harus berupa angka!");
+            input.nextLine();
+        }
+        String username, password, nama, nim;
+        switch (pilih) {
+            case 1:
+                System.out.println("\nMasuk ke Halaman Admin");
+                System.out.print("Masukkan username: ");
+                username = input.nextLine();
+                System.out.print("Masukkan Password: ");
+                password = input.nextLine();
+                for (User u : userList) {
+                    if (u instanceof Admin) {
+                        Admin a = (Admin) u;
+                        if (a.username.equals(username) && a.password.equals(password)) {
+                            user = a;
+                            System.out.println("Login Admin Berhasil!");
+                            break;
+
+                        }
+                    }
+                }
+                if (user == null) {
+                    System.out.println("Login gagal! ERROR");
+                    System.out.println("Silahkan coba lagi");
+                    System.out.println("");
+                    System.out.println("");
+                    System.out.println("");
+                    mulai();
+                }
+                break;
+            case 2:
+                System.out.println("\nMasuk ke Halaman Mahasiswa");
+                System.out.print("Masukkan nama: ");
+                nama = input.nextLine();
+                System.out.print("Masukkan NIM: ");
+                nim = input.nextLine();
+                for (User u : userList) {
+                    if (u instanceof Mahasiswa) {
+                        Mahasiswa m = (Mahasiswa) u;
+                        if (m.getNama().equals(nama) && m.getNim().equals(nim)) {
+                            user = m;
+                            System.out.println("Login Mahasiswa Berhasil!");
+                            break;
+                        }
+                    }
+                }
+                if (user == null) {
+                    System.out.println("Login gagal! ERROR");
+                    System.out.println("Silahkan coba lagi");
+                    System.out.println("");
+                    System.out.println("");
+                    System.out.println("");
+                    mulai();
+                }
+                break;
+            case 0:
+                System.out.println("Salah input");
+                break;
+            default:
+                System.out.println("Pilihan tidak valid!");
+                break;
+        }
+
+        if (user != null) {
+            user.displayInfo();
+            System.out.println("---------------------------------------");
+            user.displayAppMenu();
+        }
+
+        input.close();
+    }
+
+}
