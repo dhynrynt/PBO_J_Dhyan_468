@@ -1,0 +1,727 @@
+// package com.praktikum.Actions;
+
+public interface AdminAction { //INTERFACE
+    void manageItems();
+    void manageUsers();
+}
+
+
+
+
+public interface MahasiswaAction { //INTERFACE
+    void reportItem();
+    void viewReportedItems();
+}
+
+
+
+
+
+
+
+// package com.praktikum.Data;
+
+import com.praktikum.Users.User;
+import java.util.ArrayList;
+
+public class DataStore {
+    public static ArrayList<User> users = new ArrayList<>();
+    public static ArrayList<Item> reportedItems = new ArrayList<>();
+
+    // Tambahkan data awal
+    static {
+        // Contoh data awal
+        users.add(new com.praktikum.Users.Admin("dhyan ariyanti wijaya", "202410370110468", "admin468", "pass468"));
+        users.add(new com.praktikum.Users.Mahasiswa("dhyan ariyanti wijaya", "202410370110468"));
+    }
+}
+
+
+
+public class Item {
+    private String itemName;
+    private String description;
+    private String location;
+    private String status; // "Reported" atau "Claimed"
+
+    public Item(String itemName, String description, String location) {
+        this.itemName = itemName;
+        this.description = description;
+        this.location = location;
+        this.status = "Reported";
+    }
+
+    public String getItemName() { return itemName; }
+    public String getDescription() { return description; }
+    public String getLocation() { return location; }
+    public String getStatus() { return status; }
+
+    public void setStatus(String status) { this.status = status; }
+}
+
+
+// package com.praktikum.Gui;
+
+import com.praktikum.Data.DataStore;
+import com.praktikum.Data.Item;
+import com.praktikum.Users.Mahasiswa;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import com.praktikum.Users.User;
+
+public class AdminDashboard {
+
+    private ObservableList<Item> itemList;
+    private ObservableList<Mahasiswa> mahasiswaList;
+
+    public AdminDashboard(Stage stage) {
+        Label titleLabel = new Label("Halo, Administrator");
+
+        // TABEL BARANG
+        itemList = FXCollections.observableArrayList(DataStore.reportedItems);
+
+        TableView<Item> tableBarang = new TableView<>(itemList);
+        TableColumn<Item, String> colNama = new TableColumn<>("Nama");
+        colNama.setCellValueFactory(new PropertyValueFactory<>("itemName"));
+
+        TableColumn<Item, String> colLokasi = new TableColumn<>("Lokasi");
+        colLokasi.setCellValueFactory(new PropertyValueFactory<>("location"));
+
+        TableColumn<Item, String> colStatus = new TableColumn<>("Status");
+        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        tableBarang.getColumns().addAll(colNama, colLokasi, colStatus);
+        tableBarang.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        Button btnClaimed = new Button("Tandai Claimed");
+        btnClaimed.setOnAction(e -> {
+            Item selected = tableBarang.getSelectionModel().getSelectedItem();
+            if (selected != null && selected.getStatus().equals("Reported")) {
+                selected.setStatus("Claimed");
+                tableBarang.refresh();
+                showAlert("Barang telah ditandai sebagai Claimed.");
+            } else {
+                showAlert("Pilih barang dengan status Reported.");
+            }
+        });
+
+        // TABEL MAHASISWA
+        mahasiswaList = FXCollections.observableArrayList();
+        for (User u : DataStore.users) {
+            if (u instanceof Mahasiswa m) {
+                mahasiswaList.add(m);
+            }
+        }
+
+        TableView<Mahasiswa> tableMahasiswa = new TableView<>(mahasiswaList);
+        TableColumn<Mahasiswa, String> colNamaMhs = new TableColumn<>("Nama");
+        colNamaMhs.setCellValueFactory(new PropertyValueFactory<>("nama"));
+
+        TableColumn<Mahasiswa, String> colNimMhs = new TableColumn<>("NIM");
+        colNimMhs.setCellValueFactory(new PropertyValueFactory<>("nim"));
+
+        tableMahasiswa.getColumns().addAll(colNamaMhs, colNimMhs);
+        tableMahasiswa.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        // Form tambah Mahasiswa
+        TextField tfNamaMhs = new TextField();
+        tfNamaMhs.setPromptText("Nama Mahasiswa");
+
+        TextField tfNimMhs = new TextField();
+        tfNimMhs.setPromptText("NIM");
+
+        Button btnTambahMhs = new Button("Tambah");
+        btnTambahMhs.setOnAction(e -> {
+            String nama = tfNamaMhs.getText().trim();
+            String nim = tfNimMhs.getText().trim();
+
+            if (nama.isEmpty() || nim.isEmpty()) {
+                showAlert("Nama dan NIM wajib diisi.");
+                return;
+            }
+
+            Mahasiswa mhsBaru = new Mahasiswa(nama, nim);
+            DataStore.users.add(mhsBaru);
+            mahasiswaList.add(mhsBaru);
+
+            tfNamaMhs.clear();
+            tfNimMhs.clear();
+            showAlert("Mahasiswa ditambahkan.");
+        });
+
+        // Tombol Logout
+        Button btnLogout = new Button("Logout");
+        btnLogout.setOnAction(e -> {
+            LoginPane loginPane = new LoginPane(stage);
+            stage.setScene(new Scene(loginPane, 400, 300));
+        });
+
+        // Layout
+        VBox laporanBox = new VBox(10, new Label("Laporan Barang:"), tableBarang, btnClaimed);
+        VBox mahasiswaBox = new VBox(10, new Label("Daftar Mahasiswa:"), tableMahasiswa,
+                new HBox(10, tfNamaMhs, tfNimMhs, btnTambahMhs));
+
+        VBox mainLayout = new VBox(20, titleLabel, laporanBox, mahasiswaBox, btnLogout);
+        mainLayout.setPadding(new Insets(20));
+
+        Scene scene = new Scene(mainLayout, 700, 600);
+        stage.setScene(scene);
+        stage.setTitle("Dashboard Admin - Lost & Found");
+        stage.show();
+    }
+
+    private void showAlert(String pesan) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setHeaderText(null);
+        alert.setContentText(pesan);
+        alert.showAndWait();
+    }
+}
+
+
+
+import com.praktikum.Data.DataStore;
+import com.praktikum.Data.Item;
+import com.praktikum.Users.Mahasiswa;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+
+public class MahasiswaDashboard {
+
+
+    private Mahasiswa mahasiswa;
+    private ObservableList<Item> laporanMahasiswa;
+
+    public MahasiswaDashboard(Stage stage, Mahasiswa mahasiswa) {
+        this.mahasiswa = mahasiswa;
+        this.laporanMahasiswa = FXCollections.observableArrayList();
+
+        // Label sambutan
+        Label welcomeLabel = new Label("Selamat datang, " + mahasiswa.getNama());
+
+
+        // Input form
+        TextField tfNama = new TextField();
+        tfNama.setPromptText("Nama Barang");
+
+        TextField tfDeskripsi = new TextField();
+        tfDeskripsi.setPromptText("Deskripsi Barang");
+
+        TextField tfLokasi = new TextField();
+        tfLokasi.setPromptText("Lokasi Ditemukan");
+
+        Button btnLaporkan = new Button("Laporkan");
+
+        // Tabel laporan mahasiswa
+        TableView<Item> tabel = new TableView<>(laporanMahasiswa);
+        TableColumn<Item, String> kolomNama = new TableColumn<>("Nama");
+        kolomNama.setCellValueFactory(new PropertyValueFactory<>("itemName"));
+
+        TableColumn<Item, String> kolomLokasi = new TableColumn<>("Lokasi");
+        kolomLokasi.setCellValueFactory(new PropertyValueFactory<>("location"));
+
+        TableColumn<Item, String> kolomDeskripsi = new TableColumn<>("Deskripsi");
+        kolomDeskripsi.setCellValueFactory(new PropertyValueFactory<>("description"));
+
+        tabel.getColumns().addAll(kolomNama, kolomDeskripsi, kolomLokasi);
+        tabel.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        // Tombol logout
+        Button btnLogout = new Button("Logout");
+
+        // Aksi tombol "Laporkan"
+        btnLaporkan.setOnAction(e -> {
+            String nama = tfNama.getText().trim();
+            String deskripsi = tfDeskripsi.getText().trim();
+            String lokasi = tfLokasi.getText().trim();
+
+            if (nama.isEmpty() || deskripsi.isEmpty() || lokasi.isEmpty()) {
+                showAlert("Semua field harus diisi!");
+                return;
+            }
+
+            Item item = new Item(nama, deskripsi, lokasi);
+            DataStore.reportedItems.add(item);
+            laporanMahasiswa.add(item);
+
+            tfNama.clear();
+            tfDeskripsi.clear();
+            tfLokasi.clear();
+        });
+
+        // Aksi logout
+        btnLogout.setOnAction(e -> {
+            LoginPane loginPane = new LoginPane(stage);
+            stage.setScene(new Scene(loginPane, 400, 300));
+        });
+
+        // Load laporan yang sesuai mahasiswa (sementara belum difilter by nim)
+        for (Item item : DataStore.reportedItems) {
+            laporanMahasiswa.add(item); // jika ingin filter berdasarkan pemilik, tambahkan field pemilik
+        }
+
+        // Layout
+        HBox inputBox = new HBox(10, tfNama, tfDeskripsi, tfLokasi, btnLaporkan);
+        VBox layout = new VBox(10, welcomeLabel, inputBox, new Label("Daftar Laporan Anda"), tabel, btnLogout);
+        layout.setPadding(new Insets(15));
+
+        Scene scene = new Scene(layout, 650, 400);
+        stage.setScene(scene);
+        stage.setTitle("Lost & Found Kampus - Mahasiswa");
+        stage.show();
+    }
+
+    private void showAlert(String pesan) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Peringatan");
+        alert.setHeaderText(null);
+        alert.setContentText(pesan);
+        alert.showAndWait();
+    }
+}
+
+
+
+import com.praktikum.Data.DataStore;
+import com.praktikum.Users.Admin;
+import com.praktikum.Users.Mahasiswa;
+import com.praktikum.Users.User;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+
+public class LoginPane extends VBox {
+
+    public LoginPane(Stage stage) {
+        // Atur tata letak
+        setSpacing(10);
+        setPadding(new Insets(20));
+        setAlignment(Pos.CENTER); // ⬅️ penting agar ke tengah
+
+        // Komponen UI
+        Label title = new Label("Login Lost & Found");
+
+        ComboBox<String> roleBox = new ComboBox<>();
+        roleBox.getItems().addAll("Admin", "Mahasiswa");
+        roleBox.setPromptText("Pilih Peran");
+
+        TextField tfUser = new TextField();
+        tfUser.setPromptText("Nama / Username");
+
+        PasswordField pfPass = new PasswordField();
+        pfPass.setPromptText("NIM / Password");
+
+        Label errorLabel = new Label();
+        errorLabel.setStyle("-fx-text-fill: red");
+
+        Button loginBtn = new Button("Login");
+
+        // Event login
+        loginBtn.setOnAction(e -> {
+            String role = roleBox.getValue();
+            String userInput = tfUser.getText().trim();
+            String passInput = pfPass.getText().trim();
+
+            User userFound = null;
+
+            for (User user : DataStore.users) {
+                if (role == null) break;
+
+                if (role.equals("Admin") && user instanceof Admin admin) {
+                    if (admin.login(userInput, passInput)) {
+                        userFound = admin;
+                        break;
+                    }
+                } else if (role.equals("Mahasiswa") && user instanceof Mahasiswa mhs) {
+                    if (mhs.login(userInput, passInput)) {
+                        userFound = mhs;
+                        break;
+                    }
+                }
+            }
+
+            if (userFound != null) {
+                if (userFound instanceof Admin) {
+                    new AdminDashboard(stage);
+                } else if (userFound instanceof Mahasiswa mhs) {
+                    new MahasiswaDashboard(stage, mhs);
+                }
+            } else {
+                errorLabel.setText("Login gagal, periksa kredensial.");
+            }
+        });
+
+        // Tambahkan semua ke layout
+        getChildren().addAll(title, roleBox, tfUser, pfPass, loginBtn, errorLabel);
+    }
+}
+
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class MainApp extends Application {
+
+    @Override
+    public void start(Stage primaryStage) {
+        LoginPane loginPane = new LoginPane(primaryStage);
+        Scene scene = new Scene(loginPane, 400, 300);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Lost & Found Kampus");
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+
+
+// package com.praktikum.Main;
+
+import com.praktikum.Users.Admin;
+import com.praktikum.Users.Mahasiswa;
+import com.praktikum.Users.User;
+import com.praktikum.Data.Item;
+import java.util.Scanner;
+import java.util.ArrayList;
+
+public class LoginSystem {
+    public static ArrayList<User> userList = new ArrayList<>();
+    public static ArrayList<Item> reportedItems = new ArrayList<>();
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+
+        userList.add(new Admin("dhyan ariyanti wijaya", "20241030468", "admin468", "pass468"));
+        userList.add(new Mahasiswa("dhyan ariyanti wijaya", "202410370110468"));
+
+        System.out.println("Selamat datang di Sistem Login");
+        System.out.println("1. Login sebagai Admin");
+        System.out.println("2. Login sebagai Mahasiswa");
+        System.out.print("Masukkan pilihan: ");
+        String pilihan = scanner.nextLine();
+
+        User loggedInUser = null;
+
+        switch (pilihan) {
+            case "1" -> {
+                System.out.print("Masukkan username: ");
+                String username = scanner.nextLine();
+                System.out.print("Masukkan password: ");
+                String password = scanner.nextLine();
+
+                for (User u : userList) {
+                    if (u instanceof Admin admin) {
+                        if (admin.login(username, password)) {
+                            loggedInUser = admin;
+                            break;
+                        } else {
+                            System.out.println("Login gagal!");
+                        }
+                    }
+                }
+
+                if (loggedInUser == null) {
+                    System.out.println("Login Admin gagal. Coba lagi.");
+                }
+            }
+            case "2" -> {
+                System.out.print("Masukkan nama: ");
+                String nama = scanner.nextLine();
+                System.out.print("Masukkan NIM: ");
+                String nim = scanner.nextLine();
+
+                for (User u : userList) {
+                    if (u instanceof Mahasiswa mhs) {
+                        if (mhs.login(nama, nim)) {
+                            loggedInUser = mhs;
+                            break;
+                        } else {
+                            System.out.println("Login gagal!");
+                        }
+                    }
+                }
+
+                if (loggedInUser == null) {
+                    System.out.println("Login Mahasiswa gagal. Coba lagi.");
+                }
+            }
+            default -> System.out.println("Pilihan tidak valid!");
+        }
+
+        if (loggedInUser != null) {
+            loggedInUser.displayAppMenu();
+        }
+
+        scanner.close();
+    }
+}
+
+
+// package com.praktikum.Users;
+
+import com.praktikum.Actions.AdminAction;
+import java.util.Scanner;
+import com.praktikum.Main.LoginSystem;
+import com.praktikum.Data.Item;
+
+
+public class Admin extends User implements AdminAction {
+    private String username;
+    private String password;
+    private Scanner scanner = new Scanner(System.in);
+
+    public Admin(String nama, String nim, String username, String password) {
+        super(nama, nim);
+        this.username = username;
+        this.password = password;
+    }
+
+    @Override
+    public boolean login(String username, String password) {
+        return this.username.equals(username) && this.password.equals(password);
+    }
+
+
+    @Override
+    public String displayInfo() {
+        return "Login Admin berhasil!\nUsername: " + username +
+                "\nNama: " + getNama() +
+                "\nNIM: " + getNim();
+    }
+
+    @Override
+    public void manageItems() {
+        Scanner input = new Scanner(System.in);
+        while (true) {
+            System.out.println("1. Lihat Semua Laporan");
+            System.out.println("2. Tandai Barang Sudah Diambil");
+            System.out.println("0. Kembali");
+            System.out.print("Pilih: ");
+            String pilih = input.nextLine();
+
+            switch (pilih) {
+                case "1" -> {
+                    for (int i = 0; i < LoginSystem.reportedItems.size(); i++) {
+                        Item item = LoginSystem.reportedItems.get(i);
+                        System.out.println(i + ". " + item.getItemName() + " - " + item.getStatus());
+                    }
+                }
+                case "2" -> {
+                    System.out.print("Masukkan indeks barang yang ingin ditandai: ");
+                    try {
+                        int index = Integer.parseInt(input.nextLine());
+                        Item item = LoginSystem.reportedItems.get(index);
+                        if (item.getStatus().equals("Reported")) {
+                            item.setStatus("Claimed");
+                            System.out.println("Barang berhasil ditandai sebagai 'Claimed'");
+                        } else {
+                            System.out.println("Barang sudah ditandai sebelumnya.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Input harus berupa angka!");
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("Indeks tidak valid!");
+                    }
+                }
+                case "0" -> {
+                    return;
+                }
+                default -> System.out.println("Pilihan tidak valid.");
+            }
+        }
+    }
+
+
+    @Override
+    public void manageUsers() {
+        Scanner input = new Scanner(System.in);
+        System.out.println("1. Tambah Mahasiswa");
+        System.out.println("2. Hapus Mahasiswa");
+        System.out.print("Pilih: ");
+        String pilih = input.nextLine();
+
+        switch (pilih) {
+            case "1" -> {
+                System.out.print("Masukkan Nama Mahasiswa: ");
+                String nama = input.nextLine();
+                System.out.print("Masukkan NIM: ");
+                String nim = input.nextLine();
+                LoginSystem.userList.add(new Mahasiswa(nama, nim));
+                System.out.println("Mahasiswa berhasil ditambahkan.");
+            }
+            case "2" -> {
+                System.out.print("Masukkan NIM Mahasiswa yang ingin dihapus: ");
+                String nim = input.nextLine();
+                boolean found = false;
+                for (User u : LoginSystem.userList) {
+                    if (u instanceof Mahasiswa m && m.getNim().equals(nim)) {
+                        LoginSystem.userList.remove(u);
+                        System.out.println("Mahasiswa berhasil dihapus.");
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) System.out.println("Mahasiswa tidak ditemukan.");
+            }
+            default -> System.out.println("Pilihan tidak valid.");
+        }
+    }
+
+
+    @Override
+    public void displayAppMenu() {
+        String pilihan;
+        do {
+            System.out.println("\n-- Menu Admin --");
+            System.out.println("1. Kelola Laporan Barang");
+            System.out.println("2. Kelola Data Mahasiswa");
+            System.out.println("0. Logout");
+            System.out.print("Pilih menu: ");
+            pilihan = scanner.nextLine();
+
+            switch (pilihan) {
+                case "1" -> manageItems();
+                case "2" -> manageUsers();
+                case "0" -> System.out.println("Logout berhasil.");
+                default -> System.out.println("Pilihan tidak valid!");
+            }
+        } while (!pilihan.equals("0"));
+    }
+}
+
+
+
+
+
+import com.praktikum.Actions.MahasiswaAction;
+import java.util.Scanner;
+import com.praktikum.Data.Item;
+import com.praktikum.Main.LoginSystem;
+
+public class Mahasiswa extends User implements MahasiswaAction {
+    private Scanner scanner = new Scanner(System.in);
+
+    public Mahasiswa(String nama, String nim) {
+        super(nama, nim);
+    }
+
+    @Override
+    public boolean login(String nama, String nim) {
+        return getNama().equals(nama) && getNim().equals(nim);
+    }
+
+    @Override
+    public String displayInfo() {
+        return "Login Mahasiswa berhasil!\nNama: " + getNama() + "\nNIM: " + getNim();
+    }
+
+    @Override
+    public void reportItem() {
+        try {
+            System.out.print("Masukkan Nama Barang: ");
+            String namaBarang = scanner.nextLine();
+            System.out.print("Masukkan Deskripsi Barang: ");
+            String deskripsi = scanner.nextLine();
+            System.out.print("Masukkan Lokasi Terakhir: ");
+            String lokasi = scanner.nextLine();
+
+            Item item = new Item(namaBarang, deskripsi, lokasi);
+            LoginSystem.reportedItems.add(item);
+
+            System.out.println("Barang berhasil dilaporkan!");
+        } catch (Exception e) {
+            System.out.println("Terjadi kesalahan saat input.");
+        }
+    }
+
+    @Override
+    public void viewReportedItems() {
+        if (LoginSystem.reportedItems.isEmpty()) {
+            System.out.println("Belum ada laporan barang.");
+        } else {
+            for (Item item : LoginSystem.reportedItems) {
+                if (item.getStatus().equals("Reported")) {
+                    System.out.println("Nama Barang: " + item.getItemName());
+                    System.out.println("Deskripsi: " + item.getDescription());
+                    System.out.println("Lokasi: " + item.getLocation());
+                    System.out.println("Status: " + item.getStatus());
+                    System.out.println("-----------");
+                }
+            }
+        }
+    }
+
+    @Override
+    public void displayAppMenu() {
+        String pilihan;
+        do {
+            System.out.println("\n-- Menu Mahasiswa --");
+            System.out.println("1. Laporkan Barang Temuan/Hilang");
+            System.out.println("2. Lihat Daftar Laporan");
+            System.out.println("0. Logout");
+            System.out.print("Pilih menu: ");
+            pilihan = scanner.nextLine();
+
+            switch (pilihan) {
+                case "1" -> reportItem();
+                case "2" -> viewReportedItems();
+                case "0" -> System.out.println("Logout berhasil.");
+                default -> System.out.println("Pilihan tidak valid!");
+            }
+        } while (!pilihan.equals("0"));
+    }
+
+}
+
+
+
+public abstract class User {
+    private String nama;
+    private String nim;
+
+    public User(String nama, String nim) {
+        this.nama = nama;
+        this.nim = nim;
+    }
+
+    public String getNama() {
+        return nama;
+    }
+
+    public void setNama(String nama) {
+        this.nama = nama;
+    }
+
+    public String getNim() {
+        return nim;
+    }
+
+    public void setNim(String nim) {
+        this.nim = nim;
+    }
+
+    public abstract boolean login(String input1, String input2);
+    public abstract String displayInfo();
+    public abstract void displayAppMenu();
+}
+
+
