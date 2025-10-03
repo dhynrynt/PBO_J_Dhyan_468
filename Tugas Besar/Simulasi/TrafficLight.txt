@@ -1,0 +1,92 @@
+package Simulasi;
+
+import javafx.scene.layout.VBox;
+
+public class TrafficLight extends VBox {
+    private int redDuration;
+    private int greenDuration;
+    private int yellowDuration;
+
+    private String state;
+    private long lastSwitchTime;
+
+    public TrafficLight() {
+        this.redDuration = 5;
+        this.yellowDuration = 5;
+        this.greenDuration = 10;
+        this.state = "RED";
+        this.lastSwitchTime = System.currentTimeMillis();
+    }
+
+    public TrafficLight(int red, int yellow, int green) {
+        this.redDuration = red;
+        this.yellowDuration = yellow;
+        this.greenDuration = green;
+        this.state = "RED";
+        this.lastSwitchTime = System.currentTimeMillis();
+    }
+
+    public void update() {
+        long currentTime = System.currentTimeMillis();
+        long elapsed = (currentTime - lastSwitchTime) / 1000;
+
+        switch (state) {
+            case "RED":
+                if (elapsed >= redDuration) {
+                    state = "GREEN";
+                    lastSwitchTime = currentTime;
+                }
+                break;
+            case "GREEN":
+                if (elapsed >= greenDuration) {
+                    state = "YELLOW";
+                    lastSwitchTime = currentTime;
+                }
+                break;
+            case "YELLOW":
+                if (elapsed >= yellowDuration) {
+                    state = "RED";
+                    lastSwitchTime = currentTime;
+                }
+                break;
+        }
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+        this.lastSwitchTime = System.currentTimeMillis();
+    }
+
+    public int getRedDuration() {
+        return this.redDuration;
+    }
+
+    public void setRedDuration(int duration) {
+        this.redDuration = duration;
+    }
+
+    public int getGreenDuration() {
+        return greenDuration;
+    }
+
+    public void setGreenDuration(int greenDuration) {
+        this.greenDuration = greenDuration;
+    }
+
+    public int getYellowDuration() {
+        return yellowDuration;
+    }
+
+    public void setYellowDuration(int yellowDuration) {
+        this.yellowDuration = yellowDuration;
+    }
+
+    public long getLastSwitchTime() {
+        return lastSwitchTime;
+    }
+}
+

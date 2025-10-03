@@ -1,0 +1,79 @@
+package Simulasi;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.geometry.Insets;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
+
+public class IntersectionController extends VBox {
+    private final TrafficLight[] trafficLights;
+    private Timeline timeline;
+
+    public IntersectionController(int intersectionType) {
+        this.trafficLights = new TrafficLight[intersectionType]; // 3 atau 4 tergantung parameter
+        setPadding(new Insets(20));
+        setSpacing(10);
+
+        Label titleLabel = new Label("Simulasi Persimpangan " + intersectionType);
+        Button startSimulationButton = new Button("Mulai Simulasi");
+
+        // Initialize traffic lights with default values
+        for (int i = 0; i < trafficLights.length; i++) {
+            trafficLights[i] = new TrafficLight(5, 3, 8); // Red=5s, Yellow=3s, Green=8s
+            getChildren().add(trafficLights[i]);
+        }
+
+        startSimulationButton.setOnAction(e -> startSimulation());
+        getChildren().addAll(titleLabel, startSimulationButton);
+    }
+
+    private void startSimulation() {
+        // Stop existing timeline if running
+        if (timeline != null) {
+            timeline.stop();
+        }
+
+        int redDuration = trafficLights[0].getRedDuration();
+        int greenDuration = trafficLights[0].getGreenDuration();
+        int yellowDuration = trafficLights[0].getYellowDuration();
+
+        System.out.println("Starting intersection simulation - Red: " + redDuration + "s, Green: " + greenDuration + "s, Yellow: " + yellowDuration + "s");
+
+        timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0), e -> {
+                    setTrafficLightStates("RED");
+                    System.out.println("All lights: RED");
+                }),
+                new KeyFrame(Duration.seconds(redDuration), e -> {
+                    setTrafficLightStates("GREEN");
+                    System.out.println("All lights: GREEN");
+                }),
+                new KeyFrame(Duration.seconds(redDuration + greenDuration), e -> {
+                    setTrafficLightStates("YELLOW");
+                    System.out.println("All lights: YELLOW");
+                })
+        );
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+    }
+
+    public void stopSimulation() {
+        if (timeline != null) {
+            timeline.stop();
+        }
+    }
+
+    private void setTrafficLightStates(String state) {
+        for (TrafficLight trafficLight : trafficLights) {
+            trafficLight.setState(state);
+        }
+    }
+
+    public TrafficLight[] getTrafficLights() {
+        return trafficLights;
+    }
+}

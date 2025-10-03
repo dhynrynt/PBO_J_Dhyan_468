@@ -1,0 +1,28 @@
+package Simulasi;
+
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+
+public class RoadController extends VBox {
+    private final TrafficLight trafficLight;
+    private final Rectangle road;
+    private final Rectangle redLight; // ✅ tambahkan variabel visual
+
+    public RoadController() {
+        trafficLight = new TrafficLight();
+        road = new Rectangle(200, 100, Color.GRAY);
+        redLight = new Rectangle(30, 30, Color.RED); // ✅ inisialisasi
+
+        getChildren().addAll(road, redLight); // ✅ tambahkan ke tampilan
+    }
+
+    public void setTrafficLightState(String state) {
+        trafficLight.setState(state);
+        switch (state) {
+            case "RED": redLight.setFill(Color.RED); break;
+            case "YELLOW": redLight.setFill(Color.YELLOW); break;
+            case "GREEN": redLight.setFill(Color.LIMEGREEN); break;
+        }
+    }
+}

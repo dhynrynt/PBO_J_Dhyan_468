@@ -1,0 +1,203 @@
+package Simulasi;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import User.User;
+
+public class SimulationMenu {
+    private Stage primaryStage;
+    private BorderPane rootPane;
+    private User user;
+
+    public SimulationMenu(Stage stage, User user) {
+        this.primaryStage = stage;
+        this.user = user;
+        this.rootPane = new BorderPane();
+        setupMenu();
+    }
+
+    private void setupMenu() {
+        // Background styling
+        rootPane.setStyle("-fx-background-color: linear-gradient(to bottom, #74b9ff, #0984e3);");
+
+        // Header
+        VBox header = new VBox(10);
+        header.setAlignment(Pos.CENTER);
+        header.setPadding(new Insets(30, 20, 20, 20));
+
+        Label titleLabel = new Label("🚦 SIMULASI LAMPU LALU LINTAS 🚦");
+        titleLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 2);");
+
+        Label subtitleLabel = new Label("Pilih jenis persimpangan yang ingin disimulasikan");
+        subtitleLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: white; -fx-opacity: 0.9;");
+
+        header.getChildren().addAll(titleLabel, subtitleLabel);
+        rootPane.setTop(header);
+
+        // Center - Menu Options
+        VBox menuBox = new VBox(30);
+        menuBox.setAlignment(Pos.CENTER);
+        menuBox.setPadding(new Insets(50));
+
+        // Simpang 3 Card
+        VBox simpang3Card = createMenuCard(
+                "PERSIMPANGAN 3 ARAH",
+                "Simulasi lampu lalu lintas untuk persimpangan 3 arah\n" +
+                        "• 3 Lampu lalu lintas\n" +
+                        "• Pengaturan durasi individual\n" +
+                        "• Visualisasi real-time",
+                "#e17055",
+                3
+        );
+
+        // Simpang 4 Card
+        VBox simpang4Card = createMenuCard(
+                "PERSIMPANGAN 4 ARAH",
+                "Simulasi lampu lalu lintas untuk persimpangan 4 arah\n" +
+                        "• 4 Lampu lalu lintas\n" +
+                        "• Pengaturan durasi individual\n" +
+                        "• Visualisasi real-time",
+                "#00b894",
+                4
+        );
+
+        // Simpang 5 Card (NEW)
+        VBox simpang5Card = createMenuCard(
+                "PERSIMPANGAN 5 ARAH",
+                "Simulasi lampu lalu lintas untuk persimpangan 5 arah\n" +
+                        "• 5 Lampu lalu lintas\n" +
+                        "• Pengaturan durasi individual\n" +
+                        "• Visualisasi real-time",
+                "#6c5ce7", // You can choose a different color
+                5
+        );
+
+
+        HBox cardsContainer = new HBox(40);
+        cardsContainer.setAlignment(Pos.CENTER);
+        // Add the new simpang5Card to the container
+        cardsContainer.getChildren().addAll(simpang3Card, simpang4Card, simpang5Card);
+
+        menuBox.getChildren().add(cardsContainer);
+        rootPane.setCenter(menuBox);
+
+        // Footer
+        Label footerLabel = new Label("UI/UX BY KELOMPOK 9");
+        footerLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: white; -fx-opacity: 0.7;");
+
+        VBox footer = new VBox();
+        footer.setAlignment(Pos.CENTER);
+        footer.setPadding(new Insets(10));
+        footer.getChildren().add(footerLabel);
+        rootPane.setBottom(footer);
+    }
+
+    private VBox createMenuCard(String title, String description, String color, int type) {
+        VBox card = new VBox(15);
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(30));
+        card.setPrefSize(280, 200);
+        card.setStyle(
+                "-fx-background-color: white; " +
+                        "-fx-background-radius: 15; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);"
+        );
+
+        // Icon/Number
+        Label iconLabel = new Label(String.valueOf(type));
+        iconLabel.setStyle(
+                "-fx-font-size: 48px; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-text-fill: " + color + "; " +
+                        "-fx-background-color: " + color + "33; " +
+                        "-fx-background-radius: 50; " +
+                        "-fx-min-width: 80; " +
+                        "-fx-min-height: 80; " +
+                        "-fx-alignment: center;"
+        );
+
+        // Title
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3436;");
+        titleLabel.setWrapText(true);
+
+        // Description
+        Label descLabel = new Label(description);
+        descLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #636e72;");
+        descLabel.setWrapText(true);
+
+        // Button
+        Button selectButton = new Button("PILIH SIMULASI");
+        selectButton.setStyle(
+                "-fx-background-color: " + color + "; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-font-size: 12px; " +
+                        "-fx-background-radius: 20; " +
+                        "-fx-padding: 10 20 10 20;"
+        );
+
+        selectButton.setOnMouseEntered(e -> {
+            selectButton.setStyle(
+                    "-fx-background-color: derive(" + color + ", -20%); " +
+                            "-fx-text-fill: white; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-font-size: 12px; " +
+                            "-fx-background-radius: 20; " +
+                            "-fx-padding: 10 20 10 20; " +
+                            "-fx-cursor: hand;"
+            );
+        });
+
+        selectButton.setOnMouseExited(e -> {
+            selectButton.setStyle(
+                    "-fx-background-color: " + color + "; " +
+                            "-fx-text-fill: white; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-font-size: 12px; " +
+                            "-fx-background-radius: 20; " +
+                            "-fx-padding: 10 20 10 20;"
+            );
+        });
+
+        selectButton.setOnAction(e -> openIntersectionStage(type));
+
+        card.getChildren().addAll(iconLabel, titleLabel, descLabel, selectButton);
+
+        // Hover effect for card
+        card.setOnMouseEntered(e -> {
+            card.setStyle(
+                    "-fx-background-color: white; " +
+                            "-fx-background-radius: 15; " +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 8); " +
+                            "-fx-scale-x: 1.05; " +
+                            "-fx-scale-y: 1.05;"
+            );
+        });
+
+        card.setOnMouseExited(e -> {
+            card.setStyle(
+                    "-fx-background-color: white; " +
+                            "-fx-background-radius: 15; " +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5); " +
+                            "-fx-scale-x: 1.0; " +
+                            "-fx-scale-y: 1.0;"
+            );
+        });
+
+        return card;
+    }
+
+    private void openIntersectionStage(int type) {
+        IntersectionStage intersectionStage = new IntersectionStage(type);
+        intersectionStage.show();
+    }
+
+    public BorderPane getRoot() {
+        return rootPane;
+    }
+}

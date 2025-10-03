@@ -1,0 +1,114 @@
+package Login;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import User.*;
+import Simulasi.SimulationMenu;
+
+public class loginscreen {
+    private final Stage primaryStage;
+    private final BorderPane rootPane;
+
+    public loginscreen(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        this.rootPane = new BorderPane();
+        setupLoginScreen();
+    }
+
+    private void setupLoginScreen() {
+        // Styling background
+        rootPane.setStyle("-fx-background-color: linear-gradient(to bottom, #74b9ff, #0984e3);");
+
+        // Header
+        VBox header = new VBox(10);
+        header.setAlignment(Pos.CENTER);
+        header.setPadding(new Insets(40, 20, 20, 20));
+        Label titleLabel = new Label("🚦 SELAMAT DATANG 🚦");
+        titleLabel.setStyle("-fx-font-size: 28px; " +
+                "-fx-font-weight: bold; " +
+                "-fx-text-fill: white; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 2);");
+        Label subtitleLabel = new Label("Silakan masuk untuk memulai simulasi");
+        subtitleLabel.setStyle("-fx-font-size: 16px; " +
+                "-fx-text-fill: white; " +
+                "-fx-opacity: 0.9;");
+        header.getChildren().addAll(titleLabel, subtitleLabel);
+        rootPane.setTop(header);
+
+        // Center - Login Form Card
+        VBox loginCard = new VBox(20);
+        loginCard.setAlignment(Pos.CENTER);
+        loginCard.setPadding(new Insets(40, 50, 40, 50));
+        loginCard.setMaxWidth(350);
+        loginCard.setStyle(
+                "-fx-background-color: white; " +
+                        "-fx-background-radius: 15; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);"
+        );
+
+        Label loginHeader = new Label("Login Pengguna");
+        loginHeader.setStyle("-fx-font-size: 20px; " +  // ukuran
+                "-fx-font-weight: bold; " +   //jenis font
+                "-fx-text-fill: #2d3436;");
+
+        TextField usernameField = new TextField();
+        usernameField.setPromptText("Username");
+        usernameField.setStyle("-fx-font-size: 14px; " +
+                "-fx-padding: 10;");
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Password");
+        passwordField.setStyle("-fx-font-size: 14px; " +
+                "-fx-padding: 10;");
+
+        Button loginButton = new Button("LOGIN");
+        loginButton.setPrefWidth(Double.MAX_VALUE);
+        loginButton.setStyle(
+                "-fx-background-color: #00b894; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-font-size: 14px; " +
+                        "-fx-background-radius: 20; " +
+                        "-fx-padding: 12;"
+        );
+        loginButton.setOnAction(e -> handleLogin(usernameField.getText(), passwordField.getText()));
+
+        loginCard.getChildren().addAll(loginHeader, usernameField, passwordField, loginButton);
+
+        // Menempatkan card di tengah
+        HBox centerContainer = new HBox();
+        centerContainer.setAlignment(Pos.CENTER);
+        centerContainer.getChildren().add(loginCard);
+        rootPane.setCenter(centerContainer);
+    }
+
+    private void handleLogin(String username, String password) {
+        User user = authenticateUser(username, password);
+        if (user != null) {
+            SimulationMenu simulationMenu = new SimulationMenu(primaryStage, user);
+            Scene scene = new Scene(simulationMenu.getRoot(), 800, 600);
+            primaryStage.setScene(scene);
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Username atau password salah.");
+            alert.setHeaderText("Login Gagal");
+            alert.showAndWait();
+        }
+    }
+
+    private User authenticateUser(String username, String password) {
+        if ("Putu".equals(username) && "474".equals(password)) return new Putu(username, password);
+        if ("Japong".equals(username) && "454".equals(password)) return new Japong(username, password);
+        if ("dhyan".equals(username) && "468".equals(password)) return new Dhyan(username, password);
+        if ("Abdul".equals(username) && "472".equals(password)) return new Abdul(username, password);
+        return null;
+    }
+
+    public BorderPane getRoot() {
+        return rootPane;
+    }
+}

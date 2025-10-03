@@ -1,0 +1,135 @@
+package Simulasi;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+
+public class TrafficLightUI extends VBox {
+    private Circle redLight;
+    private Circle yellowLight;
+    private Circle greenLight;
+    private Label nameLabel;
+    private String currentState = "RED";
+
+    private int redDuration = 10;
+    private int yellowDuration = 3;
+    private int greenDuration = 7;
+
+    public TrafficLightUI(String name) {
+        this.nameLabel = new Label(name);
+        setupUI();
+    }
+
+    private void setupUI() {
+        setSpacing(10);
+        setPadding(new Insets(10));
+        setAlignment(Pos.CENTER);
+
+        nameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+
+        Rectangle background = new Rectangle(70, 160);
+        background.setFill(Color.web("#2c3e50"));
+        background.setStroke(Color.web("#34495e"));
+        background.setStrokeWidth(3);
+        background.setArcWidth(15);
+        background.setArcHeight(15);
+
+        redLight = new Circle(18);
+        redLight.setFill(Color.web("#e74c3c"));
+        redLight.setStroke(Color.web("#c0392b"));
+
+        yellowLight = new Circle(18);
+        yellowLight.setFill(Color.web("#5d4e37"));
+        yellowLight.setStroke(Color.web("#8b7355"));
+        yellowLight.setStrokeWidth(2);
+
+        greenLight = new Circle(18);
+        greenLight.setFill(Color.web("#2d5016"));
+        greenLight.setStroke(Color.web("#4a7c59"));
+        greenLight.setStrokeWidth(2);
+
+        StackPane lightContainer = new StackPane();
+
+        VBox lightBox = new VBox(15);
+        lightBox.setAlignment(Pos.CENTER);
+        lightBox.getChildren().addAll(redLight, yellowLight, greenLight);
+
+        lightContainer.getChildren().addAll(background, lightBox);
+        lightContainer.setAlignment(Pos.CENTER);
+
+        getChildren().addAll(nameLabel, lightContainer);
+
+        setState("RED");
+    }
+
+    public void setState(String state) {
+        this.currentState = state;
+        System.out.println("Setting light state to: " + state);
+
+        redLight.setFill(Color.web("#5d1a1a"));
+        yellowLight.setFill(Color.web("#5d4e37"));
+        greenLight.setFill(Color.web("#2d5016"));
+
+        switch (state.toUpperCase()) {
+            case "RED":
+                redLight.setFill(Color.web("#e74c3c"));        // Merah terang
+                redLight.setStroke(Color.web("#c0392b"));
+                System.out.println("Red light ON - Duration: " + redDuration + "s");
+                break;
+            case "YELLOW":
+                yellowLight.setFill(Color.web("#f1c40f"));      // Kuning terang
+                yellowLight.setStroke(Color.web("#f39c12"));
+                System.out.println("Yellow light ON - Duration: " + yellowDuration + "s");
+                break;
+            case "GREEN":
+                greenLight.setFill(Color.web("#27ae60"));       // Hijau terang
+                greenLight.setStroke(Color.web("#2ecc71"));
+                System.out.println("Green light ON - Duration: " + greenDuration + "s");
+                break;
+            default:
+                System.out.println("Unknown state: " + state);
+        }
+    }
+
+    // Method untuk mengupdate durasi dari luar
+    public void updateDurations(int red, int yellow, int green) {
+        this.redDuration = red;
+        this.yellowDuration = yellow;
+        this.greenDuration = green;
+    }
+
+    // Method untuk set durasi individual
+    public void setRedDuration(int duration) {
+        this.redDuration = duration;
+    }
+
+    public void setYellowDuration(int duration) {
+        this.yellowDuration = duration;
+    }
+
+    public void setGreenDuration(int duration) {
+        this.greenDuration = duration;
+    }
+
+    // Getter methods
+    public int getRedDuration() {
+        return redDuration;
+    }
+
+    public int getYellowDuration() {
+        return yellowDuration;
+    }
+
+    public int getGreenDuration() {
+        return greenDuration;
+    }
+
+    public String getCurrentState() {
+        return currentState;
+    }
+}

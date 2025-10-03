@@ -1,0 +1,257 @@
+package Simulasi;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
+public class IntersectionStage {
+    private Stage stage;
+    private int intersectionType;
+    private TrafficLightUI[] trafficLightUIs;
+    private TrafficLight[] trafficLights;
+    private Timeline[] timelines;
+    private Label statusLabel;
+    private Spinner<Integer>[] redSpinners;
+    private Spinner<Integer>[] yellowSpinners;
+    private Spinner<Integer>[] greenSpinners;
+    private boolean isSimulationRunning = false;
+
+    public IntersectionStage(int type) {
+        this.intersectionType = type;
+        this.stage = new Stage();
+        this.trafficLights = new TrafficLight[type];
+        this.trafficLightUIs = new TrafficLightUI[type];
+        this.timelines = new Timeline[type];
+
+        for (int i = 0; i < type; i++) {
+            trafficLights[i] = new TrafficLight(10, 3, 7);
+        }
+        setupStage();
+    }
+
+    private void setupStage() {
+        stage.setTitle("Simulasi Persimpangan " + intersectionType);
+        stage.setResizable(false);
+        BorderPane root = new BorderPane();
+        root.setPadding(new Insets(15));
+        VBox header = new VBox(8);
+        header.setAlignment(Pos.CENTER);
+        Label titleLabel = new Label("Simulasi Persimpangan " + intersectionType);
+        titleLabel.setStyle("-fx-font-size: 20px; " +
+                "-fx-font-weight: bold; " +
+                "-fx-text-fill: #2c3e50;");
+        statusLabel = new Label("Status: Siap untuk simulasi");
+        statusLabel.setStyle("-fx-font-size: 12px; " +
+                "-fx-text-fill: #34495e;");
+        header.getChildren().addAll(titleLabel, statusLabel);
+        root.setTop(header);
+        HBox lightsContainer = new HBox(20);
+        lightsContainer.setAlignment(Pos.CENTER);
+        lightsContainer.setPadding(new Insets(15));
+        for (int i = 0; i < intersectionType; i++) {
+            trafficLightUIs[i] = new TrafficLightUI("Lampu " + (i + 1));
+            lightsContainer.getChildren().add(trafficLightUIs[i]);
+        }
+        root.setCenter(lightsContainer);
+        VBox controlPanel = createControlPanel();
+        root.setRight(controlPanel);
+        Scene scene = new Scene(root, 800, 800);
+        stage.setScene(scene);
+        updateAllLights("RED");
+    }
+
+    private VBox createControlPanel() {
+        VBox controlPanel = new VBox(12);
+        controlPanel.setPadding(new Insets(15));
+        controlPanel.setStyle("-fx-background-color: #ecf0f1; " +
+                "-fx-background-radius: 10;");
+        controlPanel.setPrefWidth(200);
+        Label controlTitle = new Label("Panel Kontrol");
+        controlTitle.setStyle("-fx-font-size: 16px; " +
+                "-fx-font-weight: bold; " +
+                "-fx-text-fill: #2c3e50;");
+        VBox durationBox = new VBox(8);
+        Label durationLabel = new Label("Atur Durasi (detik):");
+        durationLabel.setStyle("-fx-font-weight: bold; " +
+                "-fx-font-size: 12px;");
+        redSpinners = new Spinner[intersectionType];
+        yellowSpinners = new Spinner[intersectionType];
+        greenSpinners = new Spinner[intersectionType];
+        for (int i = 0; i < intersectionType; i++) {
+            VBox lampuControl = new VBox(4);
+            Label lampuLabel = new Label("Lampu " + (i + 1));
+            lampuLabel.setStyle("-fx-font-weight: bold; " +
+                    "-fx-text-fill: #34495e; " +
+                    "-fx-font-size: 11px;");
+            HBox redBox = new HBox(8);
+            redBox.setAlignment(Pos.CENTER_LEFT);
+            Label redLabel = new Label("🔴 Merah:");
+            redLabel.setPrefWidth(60);
+            redLabel.setStyle("-fx-font-size: 10px;");
+            redSpinners[i] = new Spinner<>(1, 60, trafficLights[i].getRedDuration());
+            redSpinners[i].setPrefWidth(60);
+            redBox.getChildren().addAll(redLabel, redSpinners[i]);
+            HBox yellowBox = new HBox(8);
+            yellowBox.setAlignment(Pos.CENTER_LEFT);
+            Label yellowLabel = new Label("🟡 Kuning:");
+            yellowLabel.setPrefWidth(60);
+            yellowLabel.setStyle("-fx-font-size: 10px;");
+            yellowSpinners[i] = new Spinner<>(1, 10, trafficLights[i].getYellowDuration());
+            yellowSpinners[i].setPrefWidth(60);
+            yellowBox.getChildren().addAll(yellowLabel, yellowSpinners[i]);
+            HBox greenBox = new HBox(8);
+            greenBox.setAlignment(Pos.CENTER_LEFT);
+            Label greenLabel = new Label("🟢 Hijau:");
+            greenLabel.setPrefWidth(60);
+            greenLabel.setStyle("-fx-font-size: 10px;");
+            greenSpinners[i] = new Spinner<>(1, 60, trafficLights[i].getGreenDuration());
+            greenSpinners[i].setPrefWidth(60);
+            greenBox.getChildren().addAll(greenLabel, greenSpinners[i]);
+            lampuControl.getChildren().addAll(lampuLabel, redBox, yellowBox, greenBox);
+            if (i < intersectionType - 1) {
+                Separator separator = new Separator();
+                lampuControl.getChildren().add(separator);
+            }
+            durationBox.getChildren().add(lampuControl);
+        }
+
+        VBox buttonBox = new VBox(8);
+        Button applyButton = new Button("Terapkan Pengaturan");
+        applyButton.setStyle("-fx-background-color: #3498db; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-weight: bold; " +
+                "-fx-font-size: 10px;");
+        applyButton.setPrefWidth(160);
+        applyButton.setOnAction(e -> applySettings());
+
+        Button startButton = new Button("▶ Mulai Simulasi");
+        startButton.setStyle("-fx-background-color: #27ae60; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-weight: bold; " +
+                "-fx-font-size: 10px;");
+        startButton.setPrefWidth(160);
+        startButton.setOnAction(e -> startSimulation());
+
+        Button stopButton = new Button("⏹ Stop Simulasi");
+        stopButton.setStyle("-fx-background-color: #e74c3c; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-weight: bold; " +
+                "-fx-font-size: 10px;");
+        stopButton.setPrefWidth(160);
+        stopButton.setOnAction(e -> stopSimulation());
+
+        Button resetButton = new Button("🔄 Reset");
+        resetButton.setStyle("-fx-background-color: #f39c12; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-weight: bold; " +
+                "-fx-font-size: 10px;");
+        resetButton.setPrefWidth(160);
+        resetButton.setOnAction(e -> resetSimulation());
+
+        // --- PERUBAHAN 5: Menambahkan Tombol Kembali ---
+        Button backButton = new Button("Kembali ke Menu");
+        backButton.setStyle("-fx-background-color: #636e72; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-weight: bold; " +
+                "-fx-font-size: 10px;");
+        backButton.setPrefWidth(160);
+        backButton.setOnAction(e -> {
+            stopSimulation(); // Penting: Hentikan semua timeline sebelum menutup jendela
+            stage.close();    // Menutup jendela simulasi saat ini
+        });
+        // --- Akhir dari Perubahan 5 ---
+
+        // Menambahkan semua tombol ke VBox, termasuk tombol kembali yang baru
+        buttonBox.getChildren().addAll(applyButton, startButton, stopButton, resetButton, backButton);
+
+        controlPanel.getChildren().addAll(controlTitle, durationBox, buttonBox);
+        return controlPanel;
+    }
+
+    private void applySettings() {
+        for (int i = 0; i < intersectionType; i++) {
+            trafficLights[i].setRedDuration(redSpinners[i].getValue());
+            trafficLights[i].setYellowDuration(yellowSpinners[i].getValue());
+            trafficLights[i].setGreenDuration(greenSpinners[i].getValue());
+        }
+        statusLabel.setText("Status: Pengaturan berhasil diterapkan");
+        statusLabel.setTextFill(Color.GREEN);
+    }
+
+    private void startSimulation() {
+        stopSimulation();
+        isSimulationRunning = true;
+        statusLabel.setText("Status: Simulasi dengan waktu individual dimulai...");
+        statusLabel.setTextFill(Color.BLUE);
+
+        for (int i = 0; i < intersectionType; i++) {
+            final int lightIndex = i;
+            final TrafficLight currentLogic = trafficLights[lightIndex];
+            final TrafficLightUI currentUI = trafficLightUIs[lightIndex];
+            int greenDuration = currentLogic.getGreenDuration();
+            int yellowDuration = currentLogic.getYellowDuration();
+            int redDuration = currentLogic.getRedDuration();
+            Timeline lightTimeline = new Timeline();
+            lightTimeline.getKeyFrames().add(new KeyFrame(Duration.seconds(0), e -> currentUI.setState("GREEN")));
+            lightTimeline.getKeyFrames().add(new KeyFrame(Duration.seconds(greenDuration), e -> currentUI.setState("YELLOW")));
+            lightTimeline.getKeyFrames().add(new KeyFrame(Duration.seconds(greenDuration + yellowDuration), e -> currentUI.setState("RED")));
+            double totalCycleDuration = greenDuration + yellowDuration + redDuration;
+            lightTimeline.getKeyFrames().add(new KeyFrame(Duration.seconds(totalCycleDuration)));
+            lightTimeline.setCycleCount(Timeline.INDEFINITE);
+            timelines[lightIndex] = lightTimeline;
+        }
+
+        for (Timeline tl : timelines) {
+            if (tl != null) {
+                tl.play();
+            }
+        }
+        System.out.println("All independent timelines started.");
+    }
+
+    private void stopSimulation() {
+        if (timelines != null) {
+            for (Timeline tl : timelines) {
+                if (tl != null) {
+                    tl.stop();
+                }
+            }
+        }
+        isSimulationRunning = false;
+        if (statusLabel != null && !statusLabel.getText().startsWith("Status: Siap")) {
+            statusLabel.setText("Status: Simulasi dihentikan");
+            statusLabel.setTextFill(Color.RED);
+        }
+        System.out.println("All timelines stopped.");
+    }
+
+    private void resetSimulation() {
+        stopSimulation();
+        updateAllLights("RED");
+        statusLabel.setText("Status: Siap untuk simulasi");
+        statusLabel.setTextFill(Color.BLACK);
+        System.out.println("Simulation reset to initial RED state.");
+    }
+
+    private void updateAllLights(String state) {
+        for (int i = 0; i < intersectionType; i++) {
+            if (trafficLights[i] != null) trafficLights[i].setState(state);
+            if (trafficLightUIs[i] != null) trafficLightUIs[i].setState(state);
+        }
+    }
+
+    public void show() {
+        stage.show();
+    }
+
+    public Stage getStage() {
+        return stage;
+    }
+}
